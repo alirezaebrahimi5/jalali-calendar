@@ -67,7 +67,7 @@ function JalaliCalendar() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFnsJalali}>
-      <DatePicker
+      <DateCalendar
         mask="____/__/__"
         value={selectedDate}
         onChange={handleDateChange}
