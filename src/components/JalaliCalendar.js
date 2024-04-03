@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdapterDateFnsJalali } from '@mui/x-date-pickers/AdapterDateFnsJalali';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -12,10 +12,12 @@ import AddEventForm from './AddEventForm';
 import EditEventForm from './EditEventForm';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 
 
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { DayCalendarSkeleton } from '@mui/x-date-pickers/DayCalendarSkeleton';
+import { is } from 'date-fns-jalali/locale';
 
 
 function JalaliCalendar() {
@@ -23,10 +25,60 @@ function JalaliCalendar() {
   const [openModal, setOpenModal] = useState(false);
   const dispatch = useDispatch();
   const events = useSelector((state) => state.events.items);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [open, setOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   
+  const [selectedDays, setSelectedDays] = React.useState([]);
+
+  const EventDay = (props) => {
+    const { selectedDays = [], day, outsideCurrentMonth, ...other } = props; 
+    const normalizeDateToUTC = (date) => {
+      const dateCopy = new Date(date);
+      return new Date(Date.UTC(dateCopy.getFullYear(), dateCopy.getMonth(), dateCopy.getDate()));
+    };
+    
+    const isSelected = !outsideCurrentMonth && selectedDays.some(selectedDay =>
+      normalizeDateToUTC(new Date(selectedDay)).getTime() === normalizeDateToUTC(day).getTime()
+    );
+    return (
+      <Badge color="secondary"
+        style={isSelected ? {  right: '0'} : undefined}
+        key={props.day.toString()}
+        overlap="circular"
+        variant={isSelected ? 'dot' : undefined}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}      
+      >
+        <PickersDay {...other} outsideCurrentMonth={outsideCurrentMonth} day={day} />
+      </Badge>
+    );
+  }
+
+  const fetchSelectedDays = () => {
+    // Assuming your event dates are stored in a specific format, adjust the parsing as necessary
+    const uniqueDays = new Set();
+    events.forEach(event => {
+      const eventDate = new Date(event.date); // Adjust parsing as necessary for your date format
+      // Format the date to YYYY-MM-DD or another suitable format that ensures uniqueness
+      const dayKey = eventDate.toISOString().split('T')[0];
+      uniqueDays.add(dayKey);
+    });
+
+    // Convert the Set to an array and update the state
+    setSelectedDays([...uniqueDays]);
+    setIsLoading(false);
+    console.log('*********************');
+    console.log(selectedDays);
+  };
+
+  useEffect(() => {
+    fetchSelectedDays();
+  }, [events]); // Re-run when events change
+
   const handleOpenModal = () => {
     setOpenModal(true);
   };
@@ -66,12 +118,22 @@ function JalaliCalendar() {
   });
 
   return (
+    <div>
+    {isLoading ? <DayCalendarSkeleton /> :
     <LocalizationProvider dateAdapter={AdapterDateFnsJalali}>
       <DateCalendar
         mask="____/__/__"
         value={selectedDate}
         onChange={handleDateChange}
-        renderInput={(params) => <TextField {...params} />}
+        // renderInput={(params) => <TextField {...params} />}
+        slots={{
+          day: EventDay,
+        }}
+        slotProps={{
+          day: {
+            selectedDays,
+          },
+        }}
       />
       {dayEvents.map((event, index) => (
         <div key={index}>
@@ -108,7 +170,8 @@ function JalaliCalendar() {
           <Button onClick={() => setOpen(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
-    </LocalizationProvider>
+    </LocalizationProvider>}
+    </div>
   );
 }
 
