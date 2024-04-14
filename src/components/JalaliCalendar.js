@@ -13,8 +13,7 @@ import EditEventForm from './EditEventForm';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
-
-
+import './calendar.css';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { DayCalendarSkeleton } from '@mui/x-date-pickers/DayCalendarSkeleton';
 import { is } from 'date-fns-jalali/locale';
@@ -32,6 +31,11 @@ function JalaliCalendar() {
   
   const [selectedDays, setSelectedDays] = React.useState([]);
 
+  const isWeekend = (date) => {
+    const day = date.getDay(); // getDay() for Jalali date objects should return 5 for Friday
+    return day === 5; // Assuming Friday is the weekend
+  };
+
   const EventDay = (props) => {
     const { selectedDays = [], day, outsideCurrentMonth, ...other } = props; 
     const normalizeDateToUTC = (date) => {
@@ -42,19 +46,27 @@ function JalaliCalendar() {
     const isSelected = !outsideCurrentMonth && selectedDays.some(selectedDay =>
       normalizeDateToUTC(new Date(selectedDay)).getTime() === normalizeDateToUTC(day).getTime()
     );
+    const weekend = isWeekend(day);
     return (
-      <Badge color="secondary"
+      <Badge color="success"
         style={isSelected ? {  right: '0'} : undefined}
         key={props.day.toString()}
         overlap="circular"
         variant={isSelected ? 'dot' : undefined}
         anchorOrigin={{
-          vertical: 'top',
+          vertical: 'bottom',
           horizontal: 'left',
         }}      
       >
-        <PickersDay {...other} outsideCurrentMonth={outsideCurrentMonth} day={day} />
-      </Badge>
+      <PickersDay 
+        {...other} 
+        outsideCurrentMonth={outsideCurrentMonth} 
+        day={day} 
+        sx={{ 
+          ...(weekend ? { color: 'red', fontWeight: 'regular' } : {}), // Weekend styling
+        }}
+      />
+    </Badge>
     );
   }
 
@@ -71,8 +83,6 @@ function JalaliCalendar() {
     // Convert the Set to an array and update the state
     setSelectedDays([...uniqueDays]);
     setIsLoading(false);
-    console.log('*********************');
-    console.log(selectedDays);
   };
 
   useEffect(() => {
@@ -122,6 +132,7 @@ function JalaliCalendar() {
     {isLoading ? <DayCalendarSkeleton /> :
     <LocalizationProvider dateAdapter={AdapterDateFnsJalali}>
       <DateCalendar
+        disablePast = {true}
         mask="____/__/__"
         value={selectedDate}
         onChange={handleDateChange}

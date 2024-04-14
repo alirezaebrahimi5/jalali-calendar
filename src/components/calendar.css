@@ -1,0 +1,45 @@
+html {
+    background-color: rgba(236, 236, 236, 0.42);
+}
+.MuiDateCalendar-root	{
+    margin-top: 100px;
+    background-color: white;
+    border: solid 1px white;
+    border-radius: 3%;
+    box-shadow: 0 4px 8px 0 rgba(84, 84, 84, 0.2), 0 6px 20px 0 rgba(117, 117, 117, 0.19);
+}
+
+.Mui-selected {
+    color: #fff;
+    background-color: black !important;
+    font-weight: 500;
+    width: 25px !important;
+    height: 25px !important;
+    margin-inline: 7px !important;
+}
+
+.MuiPickersCalendarHeader-root {
+    padding-left: 12px !important;
+    position: relative !important;
+}
+
+.MuiPickersArrowSwitcher-root {
+    direction: ltr !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+}
+
+.MuiPickersCalendarHeader-labelContainer {
+    position: absolute !important;
+    justify-content: center !important;
+    margin-inline: 80px !important;
+}
+
+.css-1vooibu-MuiSvgIcon-root {
+    border: solid 1px black !important;
+    border-radius: 25% !important;
+}
+
+.MuiBadge-dot {
+    margin-left: 13px !important;
+}
